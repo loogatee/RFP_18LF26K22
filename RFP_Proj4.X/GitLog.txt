@@ -1,0 +1,203 @@
+
+BugFix in routine HtoU16, BugFix SER_Send with completionptr
+3/1/2017  11:23am
+---------------------------
+
+  Bugfix in HtoU16 is when the input line has 4 characters.
+
+  BugFix SER_Send:  completionptr was not being set if the Queue
+                    was full
+
+
+
+
+
+Stamped and Released as V1_06
+2/12/2017  12:49pm
+---------------------------
+eom
+
+
+Made Serial Input it's own file:  SerialInp.c
+2/12/2017  11:41am
+---------------------------
+Name change:  SerialDbg changed to SerialOutp or SerialInp depending on
+              'output' or 'input' operation.
+Other minor cosmetic changes
+
+
+Added command 'st':  Set Time from the command line
+2/5/2017  2:46pm
+--------------------------
+
+   Made the former 'SetTime' into SetTime_Canned.   It's the 'z' command.
+   Added new 'st': Set's the Time from the command line.
+
+   Made some cosmetic changes to SerialDbg.c
+
+
+
+
+tagging as V1_04
+2/3/2017  10:46pm
+------------------------
+
+   Only affected version.h
+
+
+
+more fine-tuning
+2/3/2017  10:35pm
+--------------------------
+
+  cmds.c:  made the 'Z' command (write the time) wait on completion
+
+  rtc.h:  made public RTC_COMPLETION_ defines
+
+  RTC_ds1307.c: added in I2C_CMDTYPE_ defines where needed
+                 have both a read completion and a write completion
+                 list terminators are now ALL 0xff 
+                 Added some scope timings to comments of ShowTime and SetComplete
+                 new routine RTC_SetComplete, callable from cmds.c 
+
+  i2c.h:  removed a bunch of defines due to fact they are all LOCAL to i2c_1master.c
+
+  i2c_1master.c  Added in the defines/typedefs removed from i2c.h
+                 Removed state I2C_STATE_WAIT_ACKEN, and moved it's functionality to
+                      the read_substate, where it prolly should have been in the 1st place
+                 removed 'while(1)' from I2C_STATE_DO_WRITEONLY: might be confusing to
+                      someone reading the code
+                 read_substate() is really tightened up
+
+
+
+refactor i2c_1master, added lots of comments, RTC_ShowTime_Loop
+1/30/2017  11:21
+--------------------------
+
+   really tightened up i2c_1master.c:
+      - added many comments
+      - write_substate & read_substate are more stand-alone, and give back
+           a return value to calling routine.   So no more hokey stuff where
+           the calling routine has to check the state machine variable as
+           an effective return value.
+
+   RTC_ds1307.c
+      - Added routine RTC_ShowTime_Loop.   It's a thread that's callable from
+           main, with a robust state machine.   Does:
+                  - gettime
+                  - showtime
+                  - wait for 1/2 second
+
+           Runs forever, it's primarily for demo and testing
+
+   PicRegs
+      - Set Oscillator to internal, 64Mhz
+      - baud rate for i2c set to 400kHz
+
+   main.c
+      - Added call to RTC_ShowTime_Loop.  It's commented out for the
+           release.
+
+
+i2c_1master:  cosmetic, code-layout, smoothing out the rough edges
+1/28/2017  9:41am
+-------------------------
+   eom
+
+
+i2c_1master:  lclistptr changed from index-based to pointer
+1/24/2017  11:21
+-------------------------
+   eom
+
+
+i2c_1master:  activeitem changed from index to pointer
+1/24/2017  10:51
+-------------------------
+   eom
+
+
+RTC_SetTime working, tightened up ShowTime by getting rid of sprintf
+1/24/2017   9:40am
+--------------------------
+
+   Cmds.c:   'z' command sets the time
+
+   BtoHnz:   'no zero' version of BtoH.   Does not have terminating zero.
+
+   RTC_ds1307.c:   implemented RTC_SetTime.   It's a compile-time thing
+                     where the time must be set in a structure.   Need to
+                     make it a command-line thing
+
+                   removed sprintf for Showing Time.   Gained some efficiencies
+                     in doing so.
+
+                   added a RTC_Init() routine for 1-time initialization of
+                     skeleton of the Show string.
+ 
+
+   i2c_1master.c:  checks completion pointer for 0.  Will not set signal
+                   if address is 0.   Allows RTC_Settime to not have a
+                   completion signal.
+
+   main.c:   new call to RTC_Init()
+
+
+
+Cleaned up Warnings, Tagged as V1_02, Created 'Releases' directory
+1/23/2017   3:13pm
+
+
+Added I2C, Added RTC_ds1307, Can Set and Get Time
+1/23/2017   2:52pm
+---------------------------
+
+   Cmds.c:     Added the 'a' command
+               Routines that need subprocessing have a common template
+                  using states 'MD_INIT' and 'MD_PROCESS'
+            
+   ConfigBits.c:
+               PLLCFG comes from a #define.  Allows it to be ON or OFF.
+
+   PICRegs.c:  Major Discovery!  Found that SCL1/SDA1 ports need to be setup
+                  as Inputs, or I get a Bus Collision (PIR2bits.BCL1IF) when
+                  I hit SEN=1.
+               Init_Oscillator:  PLLEN comes from a #define, like PLLCFG in
+                  ConfigBits, allows it to be ON or OFF
+               Init_EUSART1: Allows for new Baud Rate of 16Mhz
+               Init_I2C1:  new routine for setting up I2C #1 Registers
+
+   PICRegs.h:  new settings for 16MHz Internal Oscillator
+               new define for each oscillator setting:  PIC_PLL_CFG
+               function declaration for PICRegs_Init_I2C1
+
+   RTC.h, RTC_ds1307.c:
+               New files.  Has code for Setting & Getting the time.
+
+   Timer.h:    new TIM0_HVAL/TIM0_LVAL settings for 16Mhz
+
+   i2c.h, i2c_1master.c:
+               I2C driver for #1 channel, Master Mode
+
+   main.c:     Add Init calls and Process routine for I2C1
+
+
+
+
+
+
+
+
+  1/20/2017   21:15:08
+---------------------------
+
+  Modified Version.h,  Tagged as V1_01
+
+
+
+  1/20/2017   20:58:35
+---------------------------
+
+  Made new project.    Equivalent to RFP_Proj3.X  V1_02
+

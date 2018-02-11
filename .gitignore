@@ -1,0 +1,7 @@
+**/dist/default/**/RFP_Proj*.X.*
+/dist/default/**/memoryfile.xml
+/build/default/**/*.p1
+/build/default/**/*.p1.d
+/build/default/**/*.pre
+/nbproject/private/private.xml
+
