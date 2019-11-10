@@ -81,10 +81,11 @@ u16 HtoU16( char *pstr )
     {
         case 1:   j = 0;  break;
         case 2:   j = 4;  break;
-        default:  j = 8;  break;
+        case 3:   j = 8;  break;
+        default:  j = 12; break;
     }
 
-    for( i=0,sum=0; pstr[i] && i < 3; ++i,j-=4 )
+    for( i=0,sum=0; pstr[i] && i < 4; ++i,j-=4 )
     {
         ch = pstr[i];
         

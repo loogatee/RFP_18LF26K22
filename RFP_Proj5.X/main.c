@@ -9,6 +9,7 @@
 #include "Cmds.h"
 #include "i2c.h"
 #include "RTC.h"
+#include "Flash.h"
 
 
 
@@ -30,6 +31,7 @@ void main( void )
     TIM_Init();                               // Inits the Timer routines
     CMDS_Init();                              // Inits variables and structs for the Commands Processor
     RTC_Init();                               // Inits vars for the RTC module
+    Flash_Init();
     I2C_1master_Init();                       // Inits variables and structs for I2C #1 driver
 
     PIC_TMR0_START();                         // Timer starts to count

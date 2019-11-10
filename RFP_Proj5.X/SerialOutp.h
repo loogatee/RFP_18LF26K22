@@ -13,6 +13,8 @@
 #define SERO_TYPE_8N         0x07
 
 
+#define SER_COMPLETION_BUSY  0
+#define SER_COMPLETION_OK    1
 
 
 

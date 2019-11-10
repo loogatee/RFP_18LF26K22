@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=Cmds.c Misc.c PICRegs.c RTC_ds1307.c SerialInp.c SerialOutp.c Timer.c i2c_1master.c main.c
+SOURCEFILES_QUOTED_IF_SPACED=Cmds.c Misc.c PICRegs.c RTC_ds1307.c SerialInp.c SerialOutp.c Timer.c i2c_1master.c main.c Flash_24LC256.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Cmds.p1 ${OBJECTDIR}/Misc.p1 ${OBJECTDIR}/PICRegs.p1 ${OBJECTDIR}/RTC_ds1307.p1 ${OBJECTDIR}/SerialInp.p1 ${OBJECTDIR}/SerialOutp.p1 ${OBJECTDIR}/Timer.p1 ${OBJECTDIR}/i2c_1master.p1 ${OBJECTDIR}/main.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/Cmds.p1.d ${OBJECTDIR}/Misc.p1.d ${OBJECTDIR}/PICRegs.p1.d ${OBJECTDIR}/RTC_ds1307.p1.d ${OBJECTDIR}/SerialInp.p1.d ${OBJECTDIR}/SerialOutp.p1.d ${OBJECTDIR}/Timer.p1.d ${OBJECTDIR}/i2c_1master.p1.d ${OBJECTDIR}/main.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Cmds.p1 ${OBJECTDIR}/Misc.p1 ${OBJECTDIR}/PICRegs.p1 ${OBJECTDIR}/RTC_ds1307.p1 ${OBJECTDIR}/SerialInp.p1 ${OBJECTDIR}/SerialOutp.p1 ${OBJECTDIR}/Timer.p1 ${OBJECTDIR}/i2c_1master.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/Flash_24LC256.p1
+POSSIBLE_DEPFILES=${OBJECTDIR}/Cmds.p1.d ${OBJECTDIR}/Misc.p1.d ${OBJECTDIR}/PICRegs.p1.d ${OBJECTDIR}/RTC_ds1307.p1.d ${OBJECTDIR}/SerialInp.p1.d ${OBJECTDIR}/SerialOutp.p1.d ${OBJECTDIR}/Timer.p1.d ${OBJECTDIR}/i2c_1master.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/Flash_24LC256.p1.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/Cmds.p1 ${OBJECTDIR}/Misc.p1 ${OBJECTDIR}/PICRegs.p1 ${OBJECTDIR}/RTC_ds1307.p1 ${OBJECTDIR}/SerialInp.p1 ${OBJECTDIR}/SerialOutp.p1 ${OBJECTDIR}/Timer.p1 ${OBJECTDIR}/i2c_1master.p1 ${OBJECTDIR}/main.p1
+OBJECTFILES=${OBJECTDIR}/Cmds.p1 ${OBJECTDIR}/Misc.p1 ${OBJECTDIR}/PICRegs.p1 ${OBJECTDIR}/RTC_ds1307.p1 ${OBJECTDIR}/SerialInp.p1 ${OBJECTDIR}/SerialOutp.p1 ${OBJECTDIR}/Timer.p1 ${OBJECTDIR}/i2c_1master.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/Flash_24LC256.p1
 
 # Source Files
-SOURCEFILES=Cmds.c Misc.c PICRegs.c RTC_ds1307.c SerialInp.c SerialOutp.c Timer.c i2c_1master.c main.c
+SOURCEFILES=Cmds.c Misc.c PICRegs.c RTC_ds1307.c SerialInp.c SerialOutp.c Timer.c i2c_1master.c main.c Flash_24LC256.c
 
 
 CFLAGS=
@@ -159,6 +159,14 @@ ${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@-${MV} ${OBJECTDIR}/main.d ${OBJECTDIR}/main.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/Flash_24LC256.p1: Flash_24LC256.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/Flash_24LC256.p1.d 
+	@${RM} ${OBJECTDIR}/Flash_24LC256.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=icd3  --double=24 --float=24 --emi=wordwrite --opt=default,+asm,-asmfile,+speed,-space,-debug --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,-plib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Flash_24LC256.p1  Flash_24LC256.c 
+	@-${MV} ${OBJECTDIR}/Flash_24LC256.d ${OBJECTDIR}/Flash_24LC256.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/Flash_24LC256.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 else
 ${OBJECTDIR}/Cmds.p1: Cmds.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -231,6 +239,14 @@ ${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --emi=wordwrite --opt=default,+asm,-asmfile,+speed,-space,-debug --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,-plib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/main.p1  main.c 
 	@-${MV} ${OBJECTDIR}/main.d ${OBJECTDIR}/main.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/Flash_24LC256.p1: Flash_24LC256.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/Flash_24LC256.p1.d 
+	@${RM} ${OBJECTDIR}/Flash_24LC256.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --emi=wordwrite --opt=default,+asm,-asmfile,+speed,-space,-debug --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,-plib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Flash_24LC256.p1  Flash_24LC256.c 
+	@-${MV} ${OBJECTDIR}/Flash_24LC256.d ${OBJECTDIR}/Flash_24LC256.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/Flash_24LC256.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 endif
 

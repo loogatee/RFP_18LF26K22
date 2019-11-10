@@ -22,12 +22,13 @@
 #define I2C_STATE_START_COMPLETE         3
 #define I2C_STATE_WRITE_SLAVEADDR        4
 #define I2C_STATE_WRITE_CMDREG           5
-#define I2C_STATE_WAIT_WAIT              6
-#define I2C_STATE_DO_RSEN                7
-#define I2C_STATE_WRITE_SLAVEADDR_RW     8
-#define I2C_STATE_READ_THE_DATA          9
-#define I2C_STATE_WAIT_STOP              10
-#define I2C_STATE_DO_WRITEONLY           11
+#define I2C_STATE_WRITE_CMDREG2          6
+#define I2C_STATE_WAIT_WAIT              7
+#define I2C_STATE_DO_RSEN                8
+#define I2C_STATE_WRITE_SLAVEADDR_RW     9
+#define I2C_STATE_READ_THE_DATA          10
+#define I2C_STATE_WAIT_STOP              11
+#define I2C_STATE_DO_WRITEONLY           12
 
 #define I2C_WRITE_SUBSTATE_START         0
 #define I2C_WRITE_SUBSTATE_WAITCOMPLETE  1
@@ -66,8 +67,10 @@ static u8      *i2c_1_lcwdata;
 static u8       i2c_1_lcnumbytes;
 static u8       i2c_1_lcslave;
 static u8       i2c_1_lccmd;
+static u8       i2c_1_lccmd2;
 static u8       i2c_1_lccmdtype;
 static I2CCMDS *i2c_1_lclistptr;
+static bool     i2c_1_useCmdReg2;
 
 static u8       i2c_1_write_substate;
 static u8       i2c_1_write_data;
@@ -160,8 +163,16 @@ void I2C_1master_Process( void )
 
         i2c_1_lcslave    = i2c_1_lclistptr->ct_slaveaddr;                         // Local Copy, Slave Address
         i2c_1_lccmd      = i2c_1_lclistptr->ct_cmdreg;                            // Local Copy, Command Register
+        i2c_1_lccmd2     = i2c_1_lclistptr->ct_cmdreg2;                           // Local Copy, Command Register #2
         i2c_1_lcnumbytes = i2c_1_lclistptr->ct_numbytes;                          // Local Copy, Number of Bytes
         i2c_1_lccmdtype  = i2c_1_lclistptr->ct_cmdtype;                           // Local Copy, Command Type
+        i2c_1_useCmdReg2 = FALSE;
+        
+        if( i2c_1_lccmdtype & I2C_CMDTYPE_CMDREG2 )
+        {
+            i2c_1_lccmdtype &= ~I2C_CMDTYPE_CMDREG2;
+            i2c_1_useCmdReg2 = TRUE;
+        }
         
         i2c_1_lcdptr     = i2c_1_activeitem->ic_dptr;                             // Local Copy, Data Pointer
         i2c_1_lcwdata    = i2c_1_activeitem->ic_wdata;                            // Local Copy, Pointer to Write Data
@@ -196,6 +207,7 @@ void I2C_1master_Process( void )
                                                                                   // ELSE return indicates SUCCESS!
         i2c_1_state      = I2C_STATE_WRITE_CMDREG;                                //    new state is WRITE_CMDREG
         i2c_1_write_data = i2c_1_lccmd;                                           //    this is the byte which will be written
+   //SER_Print8( "CMDREG1: ", i2c_1_lccmd );
         FALL_THRU;                                                                //    no need to break
 
     case I2C_STATE_WRITE_CMDREG:
@@ -208,15 +220,52 @@ void I2C_1master_Process( void )
             return;                                                               //    Immediately jump out
         }
                                                                                   // ELSE return indicates SUCCESS!
-        if( i2c_1_lccmdtype == I2C_CMDTYPE_WRITEONLY )                            // Check to see if this job is WRITE-ONLY
-        {                                                                         //    Means nothing to read, need only to write some registers
-            i2c_1_state          = I2C_STATE_DO_WRITEONLY;                        //    new state is DO_WRITEONLY
-            i2c_1_write_data     = *i2c_1_lcwdata ++;                             //    Get the byte to write, and increment pointer thru this list
-            return;                                                               //    return immediately
+        if( i2c_1_useCmdReg2 == FALSE )
+        {
+            if( i2c_1_lccmdtype == I2C_CMDTYPE_WRITEONLY )                        // Check to see if this job is WRITE-ONLY
+            {                                                                     //    Means nothing to read, need only to write some registers
+                i2c_1_state          = I2C_STATE_DO_WRITEONLY;                    //    new state is DO_WRITEONLY
+                i2c_1_write_data     = *i2c_1_lcwdata ++;                         //    Get the byte to write, and increment pointer thru this list
+                return;                                                           //    return immediately
+            }
+            
+            i2c_1_state = I2C_STATE_DO_RSEN;                                      // ELSE gonna do a read, new state is DO_RSEN
+            PIC_REGISTER SSP1CON2bits.RSEN = 1;                                   // Bang!  Hit the RSEN bit.
         }
-        i2c_1_state = I2C_STATE_DO_RSEN;                                          // ELSE gonna do a read, new state is DO_RSEN
-        PIC_REGISTER SSP1CON2bits.RSEN = 1;                                       // Bang!  Hit the RSEN bit.
+        else
+        {
+            i2c_1_state      = I2C_STATE_WRITE_CMDREG2;
+            i2c_1_write_data = i2c_1_lccmd2;
+            return;
+    //SER_Print8( "CMDREG2: ", i2c_1_lccmd2 );        
+        }
+
         FALL_THRU;                                                                // no need to break
+        
+    case I2C_STATE_WRITE_CMDREG2:
+
+        if( i2c_1_state == I2C_STATE_WRITE_CMDREG2 )
+        {
+            if( (tmpb = i2c_1_do_write_substate()) == RTN_CONTINUE ) { return; }  // Keep calling write_substate while return value says to CONTINUE
+
+            if( tmpb == RTN_RESTART )                                             // Test for the RESTART return value
+            {                                                                     //    RESTART indicates some error was detected
+                i2c_1_state = I2C_STATE_TRY_RESTART;                              //    Change state machine to TRY_RESTART.  Means 'try again'
+                return;                                                           //    Immediately jump out
+            }
+                                                                                  // ELSE return indicates SUCCESS!
+            if( i2c_1_lccmdtype == I2C_CMDTYPE_WRITEONLY )                        // Check to see if this job is WRITE-ONLY
+            {                                                                     //    Means nothing to read, need only to write some registers
+                i2c_1_state          = I2C_STATE_DO_WRITEONLY;                    //    new state is DO_WRITEONLY
+                i2c_1_write_data     = *i2c_1_lcwdata ++;                         //    Get the byte to write, and increment pointer thru this list
+          //SER_Print8( "WRITEONLY: ", i2c_1_write_data );
+                return;                                                           //    return immediately
+            }
+
+            i2c_1_state = I2C_STATE_DO_RSEN;                                      // ELSE gonna do a read, new state is DO_RSEN
+            PIC_REGISTER SSP1CON2bits.RSEN = 1;                                   // Bang!  Hit the RSEN bit.
+        }
+        FALL_THRU;            
 
     case I2C_STATE_DO_RSEN:
 
@@ -306,6 +355,7 @@ void I2C_1master_Process( void )
         }
 
         i2c_1_write_data = *i2c_1_lcwdata++;                                      // Assign the new byte to write, and increment through the list
+   //SER_Print8( "wdata: ", i2c_1_write_data );        
         i2c_1_do_write_substate();                                                // kick off write state machine.  No worries about return val
     }
 }
@@ -424,10 +474,19 @@ static u8 i2c_1_do_read_substate( void )
         if( i2c_1_bus_collision() == TRUE ) { return RTN_RESTART; }           // If Bus Collision here, transition to RESTART
         
         if( i2c_1_lcnumbytes == 0 )                                           // When num bytes is 0, the Job is finished
+        {
             PIC_REGISTER SSP1CON2bits.ACKDT = 1;                              //    Done: Send Not Acknowledge
+            if( i2c_1_lcslave == 0xA0 )
+            {
+                i2c_1_read_substate = I2C_READ_SUBSTATE_START;                //    We are:  state goes back to START
+                return RTN_SUCCESS;                                           //    Indicates Read State Machine is complete
+            }
+        }
         else
+        {
             PIC_REGISTER SSP1CON2bits.ACKDT = 0;                              //    Not done yet:  Send Acknowledge
-        
+        }
+
         PIC_REGISTER SSP1CON2bits.ACKEN = 1;                                  // Initiate Acknowledge sequence and xmit ACKDT bit
         i2c_1_read_substate = I2C_READ_SUBSTATE_ACKEN;                        // state changes.
         FALL_THRU;                                                            // OK to fall through

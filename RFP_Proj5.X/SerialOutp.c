@@ -71,6 +71,7 @@ void SerialOutp_Init( void )
 void SER_Send( u8 otype, char *sptr, u8 *completionptr, u16 aval )
 {
     SERI  *lqitem;                                                              // Pointer to Array Element where the data will go
+    u8     xx = SER_COMPLETION_OK;
 
     if( serd_num_qitems != SERO_SQENTRYS )                                      // Proceed if the Queue is not full
     {
@@ -82,10 +83,10 @@ void SER_Send( u8 otype, char *sptr, u8 *completionptr, u16 aval )
         lqitem->sr_otype   = otype;                                             // otype goes into element on the Q
         lqitem->sr_sptr    = sptr;                                              // sptr goes into element on the Q
         lqitem->sr_compPtr = completionptr;                                     // completionptr goes into element on the Q
-        
-        if( completionptr != 0 ) { *completionptr = 0; }                        // if pointer is valid, store 0, indicating Not Done
+        xx                 = SER_COMPLETION_BUSY;
     }
-                                                                                // Else the Q is full.  Effectively tosses the data
+    
+    if( completionptr != 0 ) { *completionptr = xx; }                           // if pointer is valid, store 0, indicating Not Done
 }
 
 

@@ -24,8 +24,8 @@ static u16  rtc_loop_timer;         // timer counter for the showtime_loop
 
 static I2CCMDS rtc_registers[] =
 {
-    { 0xD0, 0x00, 0x07, I2C_CMDTYPE_RW },        // RTC: read the registers
-    { 0xff, 0xff, 0xff, 0xff           },        // Terminate the List
+    { 0xD0, 0x00, 0x00, 0x07, I2C_CMDTYPE_RW },        // RTC: read the registers
+    { 0xff, 0xff, 0xff, 0xff, 0xff           },        // Terminate the List
 };
 
 static const char *gWeeks[7] =
@@ -41,18 +41,18 @@ static const char *gWeeks[7] =
 
 
 //
-// { SlaveAddr, CmdReg, NumBytes, CmdType }
+// { SlaveAddr, CmdReg, CmdReg2, NumBytes, CmdType }
 //
 static I2CCMDS rtc_regs_w0[2] =
 {
-    { 0xD0, 0x00, 0x07, I2C_CMDTYPE_WRITEONLY },        // RTC: write the registers
-    { 0xff, 0xff, 0xff, 0xff                  },        // Terminate the List
+    { 0xD0, 0x00, 0x00, 0x07, I2C_CMDTYPE_WRITEONLY },        // RTC: write the registers
+    { 0xff, 0xff, 0xff, 0xff, 0xff                  },        // Terminate the List
 };
 
 static I2CCMDS rtc_regs_w1[2] =
 {
-    { 0xD0, 0x00, 0x01, I2C_CMDTYPE_WRITEONLY },        // RTC: write the registers
-    { 0xff, 0xff, 0xff, 0xff                  },        // Terminate the List
+    { 0xD0, 0x00, 0x00, 0x01, I2C_CMDTYPE_WRITEONLY },        // RTC: write the registers
+    { 0xff, 0xff, 0xff, 0xff, 0xff                  },        // Terminate the List
 };
 
                             //    80, mins,  hrs, wkday,  day,  mon,  yr

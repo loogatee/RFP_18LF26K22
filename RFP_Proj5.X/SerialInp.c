@@ -9,7 +9,7 @@
 #define SERI_STATE_GETCHARS    0
 #define SERI_STATE_WAITDONE    1
 
-#define SERI_MAX_CHARS         21
+#define SERI_MAX_CHARS         26
 
 
 
